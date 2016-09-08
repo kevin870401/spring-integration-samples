@@ -17,8 +17,8 @@ package com.otpp.annualstatement.service.integration;
 
 import java.io.File;
 
-import org.junit.Test;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.integration.file.remote.RemoteFileTemplate;
 import org.springframework.integration.file.remote.session.CachingSessionFactory;
@@ -27,12 +27,23 @@ import org.springframework.integration.file.remote.session.SessionFactory;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.Assert;
 
 import com.jcraft.jsch.ChannelSftp.LsEntry;
+import org.testng.annotations.Test;
 
+@ContextConfiguration(classes = {CyberArkSerivceConfig.class})
+@TestPropertySource("classpath:application-it.properties")
+public class SftpOutboundTransferManagerIT extends AbstractTestNGSpringContextTests {
 
-public class SftpOutboundTransferManagerIT {
+    @Autowired
+    CachingSessionFactory sftpSessionFactory;
+
+    @Autowired
+    MessageChannel inputChannel;
 
 	@Test
 	public void testOutbound() throws Exception{
@@ -43,8 +54,8 @@ public class SftpOutboundTransferManagerIT {
 		final ClassPathXmlApplicationContext ac =
 			new ClassPathXmlApplicationContext("/META-INF/spring/integration/SftpOutboundTransfer.xml", SftpOutboundTransferManagerIT.class);
 		@SuppressWarnings("unchecked")
-		SessionFactory<LsEntry> sessionFactory = ac.getBean(CachingSessionFactory.class);
-		RemoteFileTemplate<LsEntry> template = new RemoteFileTemplate<LsEntry>(sessionFactory);
+
+		RemoteFileTemplate<LsEntry> template = new RemoteFileTemplate<LsEntry>(sftpSessionFactory);
 		com.otpp.annualstatement.service.integration.SftpTestUtils.createTestFiles(template); // Just the directory
 
 		try {
@@ -53,7 +64,6 @@ public class SftpOutboundTransferManagerIT {
 			Assert.isTrue(file.exists(), String.format("File '%s' does not exist.", sourceFileName));
 
 			final Message<File> message = MessageBuilder.withPayload(file).build();
-			final MessageChannel inputChannel = ac.getBean("inputChannel", MessageChannel.class);
 
 			inputChannel.send(message);
 			Thread.sleep(2000);

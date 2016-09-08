@@ -15,9 +15,9 @@
  */
 package com.otpp.annualstatement.service.integration;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -52,7 +52,7 @@ public class SftpTestUtils {
 						session.mkdir(PSOBDEV_DIR+"sample");
 					}
 					catch (Exception e) {
-						assertThat(e.getMessage(), containsString("failed to create"));
+						assertThat(e.getMessage()).contains("failed to create");
 					}
 					for (int i = 0; i < fileNames.length; i++) {
 						stream.reset();
