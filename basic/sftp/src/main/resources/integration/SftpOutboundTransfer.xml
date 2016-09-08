@@ -11,7 +11,7 @@
 		http://www.springframework.org/schema/integration/sftp http://www.springframework.org/schema/integration/sftp/spring-integration-sftp.xsd">
 
 
-  <context:property-placeholder location="classpath:application-it.properties"/>
+  <context:property-placeholder location="classpath:user.properties"/>
 
   <bean id="serverPort" class="java.lang.String">
     <constructor-arg value="#{'${port}' == '-1' ? T(org.springframework.integration.samples.sftp.EmbeddedSftpServer).PORT : '${port}'}"/>

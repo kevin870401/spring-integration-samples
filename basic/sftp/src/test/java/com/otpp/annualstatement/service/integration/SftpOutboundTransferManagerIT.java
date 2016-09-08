@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.integration.samples.sftp;
+package com.otpp.annualstatement.service.integration;
 
 import java.io.File;
 
@@ -23,6 +23,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.integration.file.remote.RemoteFileTemplate;
 import org.springframework.integration.file.remote.session.CachingSessionFactory;
 import org.springframework.integration.file.remote.session.SessionFactory;
+
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -30,14 +31,8 @@ import org.springframework.util.Assert;
 
 import com.jcraft.jsch.ChannelSftp.LsEntry;
 
-/**
- *
- * @author Oleg Zhurakousky
- * @author Gunnar Hillert
- * @author Gary Russell
- *
- */
-public class SftpOutboundTransferSample {
+
+public class SftpOutboundTransferManagerIT {
 
 	@Test
 	public void testOutbound() throws Exception{
@@ -46,11 +41,11 @@ public class SftpOutboundTransferSample {
 		final String destinationFileName = sourceFileName +"_foo";
 
 		final ClassPathXmlApplicationContext ac =
-			new ClassPathXmlApplicationContext("/META-INF/spring/integration/SftpOutboundTransfer.xml", SftpOutboundTransferSample.class);
+			new ClassPathXmlApplicationContext("/META-INF/spring/integration/SftpOutboundTransfer.xml", SftpOutboundTransferManagerIT.class);
 		@SuppressWarnings("unchecked")
 		SessionFactory<LsEntry> sessionFactory = ac.getBean(CachingSessionFactory.class);
 		RemoteFileTemplate<LsEntry> template = new RemoteFileTemplate<LsEntry>(sessionFactory);
-		SftpTestUtils.createTestFiles(template); // Just the directory
+		com.otpp.annualstatement.service.integration.SftpTestUtils.createTestFiles(template); // Just the directory
 
 		try {
 			final File file = new File(sourceFileName);
