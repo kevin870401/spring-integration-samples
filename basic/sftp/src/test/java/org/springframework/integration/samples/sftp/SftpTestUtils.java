@@ -39,22 +39,24 @@ import com.jcraft.jsch.SftpException;
  */
 public class SftpTestUtils {
 
+
+    private static final String PSOBDEV_DIR= "/PSOBDEV/";
 	public static void createTestFiles(RemoteFileTemplate<LsEntry> template, final String... fileNames) {
 		if (template != null) {
 			final ByteArrayInputStream stream = new ByteArrayInputStream("foo".getBytes());
 			template.execute(new SessionCallback<LsEntry, Void>() {
 
-				@Override
+
 				public Void doInSession(Session<LsEntry> session) throws IOException {
 					try {
-						session.mkdir("si.sftp.sample");
+						session.mkdir(PSOBDEV_DIR+"sample");
 					}
 					catch (Exception e) {
 						assertThat(e.getMessage(), containsString("failed to create"));
 					}
 					for (int i = 0; i < fileNames.length; i++) {
 						stream.reset();
-						session.write(stream, "si.sftp.sample/" + fileNames[i]);
+						session.write(stream, PSOBDEV_DIR+"sample/" + fileNames[i]);
 					}
 					return null;
 				}
@@ -66,20 +68,20 @@ public class SftpTestUtils {
 		if (template != null) {
 			template.execute(new SessionCallback<LsEntry, Void>() {
 
-				@Override
+
 				public Void doInSession(Session<LsEntry> session) throws IOException {
 					// TODO: avoid DFAs with Spring 4.1 (INT-3412)
 					ChannelSftp channel = (ChannelSftp) new DirectFieldAccessor(new DirectFieldAccessor(session)
 							.getPropertyValue("targetSession")).getPropertyValue("channel");
 					for (int i = 0; i < fileNames.length; i++) {
 						try {
-							session.remove("si.sftp.sample/" + fileNames[i]);
+							session.remove(PSOBDEV_DIR+"sample/" + fileNames[i]);
 						}
 						catch (IOException e) {}
 					}
 					try {
 						// should be empty
-						channel.rmdir("si.sftp.sample");
+						channel.rmdir(PSOBDEV_DIR+"sample");
 					}
 					catch (SftpException e) {
 						fail("Expected remote directory to be empty " + e.getMessage());
@@ -94,14 +96,14 @@ public class SftpTestUtils {
 		if (template != null) {
 			return template.execute(new SessionCallback<LsEntry, Boolean>() {
 
-				@Override
+
 				public Boolean doInSession(Session<LsEntry> session) throws IOException {
 					// TODO: avoid DFAs with Spring 4.1 (INT-3412)
 					ChannelSftp channel = (ChannelSftp) new DirectFieldAccessor(new DirectFieldAccessor(session)
 							.getPropertyValue("targetSession")).getPropertyValue("channel");
 					for (int i = 0; i < fileNames.length; i++) {
 						try {
-							SftpATTRS stat = channel.stat("si.sftp.sample/" + fileNames[i]);
+							SftpATTRS stat = channel.stat(PSOBDEV_DIR+"sample/" + fileNames[i]);
 							if (stat == null) {
 								System.out.println("stat returned null for " + fileNames[i]);
 								return false;
