@@ -46,7 +46,7 @@ public class SftpOutboundTransferSample {
 		final String destinationFileName = sourceFileName +"_foo";
 
 		final ClassPathXmlApplicationContext ac =
-			new ClassPathXmlApplicationContext("/META-INF/spring/integration/SftpOutboundTransferSample-context.xml", SftpOutboundTransferSample.class);
+			new ClassPathXmlApplicationContext("/META-INF/spring/integration/SftpOutboundTransfer.xml", SftpOutboundTransferSample.class);
 		@SuppressWarnings("unchecked")
 		SessionFactory<LsEntry> sessionFactory = ac.getBean(CachingSessionFactory.class);
 		RemoteFileTemplate<LsEntry> template = new RemoteFileTemplate<LsEntry>(sessionFactory);
