@@ -64,7 +64,7 @@ public class SftpTestUtils {
 		}
 	}
 
-	public static void cleanUp(RemoteFileTemplate<LsEntry> template, final String... fileNames) {
+	public static void cleanUp(final String directory,RemoteFileTemplate<LsEntry> template, final String... fileNames) {
 		if (template != null) {
 			template.execute(new SessionCallback<LsEntry, Void>() {
 
@@ -75,13 +75,13 @@ public class SftpTestUtils {
 							.getPropertyValue("targetSession")).getPropertyValue("channel");
 					for (int i = 0; i < fileNames.length; i++) {
 						try {
-							session.remove(PSOBDEV_DIR+"sample/" + fileNames[i]);
+							session.remove(directory +"/"+ fileNames[i]);
 						}
 						catch (IOException e) {}
 					}
 					try {
 						// should be empty
-						channel.rmdir(PSOBDEV_DIR+"sample");
+						channel.rmdir(directory);
 					}
 					catch (SftpException e) {
 						fail("Expected remote directory to be empty " + e.getMessage());
@@ -92,7 +92,7 @@ public class SftpTestUtils {
 		}
 	}
 
-	public static boolean fileExists(RemoteFileTemplate<LsEntry> template, final String... fileNames) {
+	public static boolean fileExists(final String directory,RemoteFileTemplate<LsEntry> template, final String... fileNames) {
 		if (template != null) {
 			return template.execute(new SessionCallback<LsEntry, Boolean>() {
 
@@ -103,7 +103,7 @@ public class SftpTestUtils {
 							.getPropertyValue("targetSession")).getPropertyValue("channel");
 					for (int i = 0; i < fileNames.length; i++) {
 						try {
-							SftpATTRS stat = channel.stat(PSOBDEV_DIR+"sample/" + fileNames[i]);
+							SftpATTRS stat = channel.stat(directory +"/"+ fileNames[i]);
 							if (stat == null) {
 								System.out.println("stat returned null for " + fileNames[i]);
 								return false;

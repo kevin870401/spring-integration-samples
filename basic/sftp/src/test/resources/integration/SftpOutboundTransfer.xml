@@ -34,8 +34,9 @@
 	<int-sftp:outbound-channel-adapter id="sftpOutboundAdapter"
 				session-factory="sftpSessionFactory"
 				channel="inputChannel"
-				remote-filename-generator-expression="payload.getName() + '_foo'"
-				remote-directory="/PSOBDEV/sample">
+        auto-create-directory="true"
+        remote-filename-generator-expression="getHeaders().get('filename')"
+				remote-directory-expression="getHeaders().get('fileDirectory')">
 		<int-sftp:request-handler-advice-chain>
 			<int:retry-advice />
 		</int-sftp:request-handler-advice-chain>

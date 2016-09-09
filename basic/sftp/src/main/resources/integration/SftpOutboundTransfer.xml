@@ -11,34 +11,33 @@
 		http://www.springframework.org/schema/integration/sftp http://www.springframework.org/schema/integration/sftp/spring-integration-sftp.xsd">
 
 
-  <context:property-placeholder location="classpath:user.properties"/>
-
   <bean id="serverPort" class="java.lang.String">
     <constructor-arg value="#{'${port}' == '-1' ? T(org.springframework.integration.samples.sftp.EmbeddedSftpServer).PORT : '${port}'}"/>
   </bean>
-	<bean id="sftpSessionFactory" class="org.springframework.integration.file.remote.session.CachingSessionFactory">
-		<constructor-arg ref="defaultSftpSessionFactory" />
-	</bean>
+  <bean id="sftpSessionFactory" class="org.springframework.integration.file.remote.session.CachingSessionFactory">
+    <constructor-arg ref="defaultSftpSessionFactory" />
+  </bean>
 
-	<bean id="defaultSftpSessionFactory"
-			class="org.springframework.integration.sftp.session.DefaultSftpSessionFactory">
-		<property name="host" value="${host}"/>
-		<property name="password" value="${password}"/>
-		<property name="port" value="#{serverPort}"/>
-		<property name="user" value="${username}"/>
-		<property name="allowUnknownKeys" value="true"/>
-	</bean>
+  <bean id="defaultSftpSessionFactory"
+    class="org.springframework.integration.sftp.session.DefaultSftpSessionFactory">
+    <property name="host" value="${host}"/>
+    <property name="password" value="${password}"/>
+    <property name="port" value="#{serverPort}"/>
+    <property name="user" value="${username}"/>
+    <property name="allowUnknownKeys" value="true"/>
+  </bean>
 
-	<int:channel id="inputChannel"/>
+  <int:channel id="inputChannel"/>
 
-	<int-sftp:outbound-channel-adapter id="sftpOutboundAdapter"
-				session-factory="sftpSessionFactory"
-				channel="inputChannel"
-				remote-filename-generator-expression="payload.getName() + '_foo'"
-				remote-directory="/PSOBDEV/sample">
-		<int-sftp:request-handler-advice-chain>
-			<int:retry-advice />
-		</int-sftp:request-handler-advice-chain>
-	</int-sftp:outbound-channel-adapter>
+  <int-sftp:outbound-channel-adapter id="sftpOutboundAdapter"
+    session-factory="sftpSessionFactory"
+    channel="inputChannel"
+    auto-create-directory="true"
+    remote-filename-generator-expression="getHeaders().get('filename')"
+    remote-directory-expression="getHeaders().get('fileDirectory')">
+    <int-sftp:request-handler-advice-chain>
+      <int:retry-advice />
+    </int-sftp:request-handler-advice-chain>
+  </int-sftp:outbound-channel-adapter>
 
 </beans>

@@ -15,24 +15,16 @@
  */
 package com.otpp.annualstatement.service.integration;
 
-import java.io.File;
-
+import com.google.common.io.Resources;
+import com.jcraft.jsch.ChannelSftp.LsEntry;
+import integration.com.otpp.annualstatement.service.integration.SftpOutboundTransferManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.integration.file.remote.RemoteFileTemplate;
 import org.springframework.integration.file.remote.session.CachingSessionFactory;
-import org.springframework.integration.file.remote.session.SessionFactory;
-
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.Assert;
-
-import com.jcraft.jsch.ChannelSftp.LsEntry;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = {CyberArkSerivceConfig.class})
@@ -42,41 +34,36 @@ public class SftpOutboundTransferManagerIT extends AbstractTestNGSpringContextTe
     @Autowired
     CachingSessionFactory sftpSessionFactory;
 
+
     @Autowired
-    MessageChannel inputChannel;
+    SftpOutboundTransferManager sftpOutboundTransferManager;
 
-	@Test
-	public void testOutbound() throws Exception{
+    private static final String SOURCE_FILE_NAME = "application-it.properties";
 
-		final String sourceFileName = "README.md";
-		final String destinationFileName = sourceFileName +"_foo";
+    private static final String DIRECTORY = "/PSOBDEV/sample";
+    @Test
+    public void send_byteArray_fileExists() throws Exception{
 
-		final ClassPathXmlApplicationContext ac =
-			new ClassPathXmlApplicationContext("/META-INF/spring/integration/SftpOutboundTransfer.xml", SftpOutboundTransferManagerIT.class);
-		@SuppressWarnings("unchecked")
 
-		RemoteFileTemplate<LsEntry> template = new RemoteFileTemplate<LsEntry>(sftpSessionFactory);
-		com.otpp.annualstatement.service.integration.SftpTestUtils.createTestFiles(template); // Just the directory
+        @SuppressWarnings("unchecked")
+        RemoteFileTemplate<LsEntry> template = new RemoteFileTemplate<LsEntry>(sftpSessionFactory);
+        try {
 
-		try {
-			final File file = new File(sourceFileName);
+            byte[] docText = Resources.toByteArray(Resources.getResource(SOURCE_FILE_NAME));
 
-			Assert.isTrue(file.exists(), String.format("File '%s' does not exist.", sourceFileName));
+            sftpOutboundTransferManager.send(docText,SOURCE_FILE_NAME,DIRECTORY);
 
-			final Message<File> message = MessageBuilder.withPayload(file).build();
+            Thread.sleep(2000);
 
-			inputChannel.send(message);
-			Thread.sleep(2000);
+           Assert.isTrue(SftpTestUtils.fileExists(DIRECTORY,template, SOURCE_FILE_NAME));
+            logger.info(String.format("Successfully transferred '%s' file to a " +
+                    "remote location under the name '%s'", SOURCE_FILE_NAME, SOURCE_FILE_NAME));
+        }
+        finally {
+            SftpTestUtils.cleanUp(DIRECTORY,template, SOURCE_FILE_NAME);
 
-			Assert.isTrue(SftpTestUtils.fileExists(template, destinationFileName));
+        }
 
-			System.out.println(String.format("Successfully transferred '%s' file to a " +
-					"remote location under the name '%s'", sourceFileName, destinationFileName));
-		}
-		finally {
-			SftpTestUtils.cleanUp(template, destinationFileName);
-			ac.close();
-		}
-	}
 
+    }
 }
